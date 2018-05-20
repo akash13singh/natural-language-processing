@@ -2,6 +2,7 @@ import nltk
 import pickle
 import re
 import numpy as np
+import csv
 
 nltk.download('stopwords')
 from nltk.corpus import stopwords
@@ -45,12 +46,19 @@ def load_embeddings(embeddings_path):
     # Hint: you have already implemented a similar routine in the 3rd assignment.
     # Note that here you also need to know the dimension of the loaded embeddings.
     # When you load the embeddings, use numpy.float32 type as dtype
-
     ########################
     #### YOUR CODE HERE ####
     ########################
+    embeddings = {}
+    with open(embeddings_path, newline='') as embedding_file:
+        tsv_handle = csv.reader(embedding_file, delimiter = "\t")
+        for line in tsv_handle:
+            token = line[0]
+            embedding = np.array(line[1:]).astype(np.float32)
+            embeddings[token] = embedding
+        dim = len(line) - 1
+    return embeddings, dim
 
-        pass 
 
 def question_to_vec(question, embeddings, dim):
     """Transforms a string to an embedding by averaging word embeddings."""
@@ -61,7 +69,19 @@ def question_to_vec(question, embeddings, dim):
     #### YOUR CODE HERE ####
     ########################
 
-        pass
+    result = np.zeros(shape=dim)
+    question = question.strip()
+    count = 0
+    
+    for word in question.split():
+        if word in embeddings:
+            result = result + embeddings[word]
+            count+=1
+    
+    if count>0:
+        result = result/count
+        
+    return result
 
 
 def unpickle_file(filename):
